@@ -1,0 +1,176 @@
+API DESIGN (CURRENT)
+
+Authentication:
+- POST /auth/register
+	Register patient or doctor account.
+- POST /auth/login
+	Login for admin/doctor/patient/hospital and return JWT.
+- POST /auth/logout
+	Logout current authenticated user.
+
+Patients:
+- GET /patients
+	Roles: admin, hospital.
+	Get all patients (hospital sees scoped data by service rules).
+- GET /patients/:id
+	Roles: owner patient or admin.
+	Get patient by id.
+- POST /patients
+	Roles: admin, hospital.
+	Create patient.
+- PUT /patients/:id
+	Roles: admin, hospital, patient.
+	Update patient.
+- DELETE /patients/:id
+	Roles: admin, hospital.
+	Delete patient.
+
+Doctors:
+- GET /doctors
+	Roles: admin, hospital.
+	Get all doctors.
+- GET /doctors/search?q=&hospitalId=
+	Roles: admin, doctor, patient.
+	Search doctors for booking.
+- GET /doctors/admin/pending?hospitalId=
+	Roles: admin, hospital.
+	List pending doctors.
+- GET /doctors/admin/stats?hospitalId=
+	Role: admin.
+	Doctor statistics.
+- GET /doctors/hospital/:hospitalId
+	Role: admin.
+	Doctors by hospital.
+- PATCH /doctors/:id/approve
+	Role: hospital.
+	Approve doctor of hospital.
+- PATCH /doctors/:id/reject
+	Role: hospital.
+	Reject doctor of hospital.
+- GET /doctors/:id
+	Roles: admin, hospital, doctor.
+	Get doctor by id.
+- POST /doctors
+	Roles: admin, hospital.
+	Create doctor.
+- PUT /doctors/:id
+	Roles: admin, hospital, doctor.
+	Update doctor profile/availability/active hours.
+- DELETE /doctors/:id
+	Roles: admin, hospital.
+	Delete doctor.
+
+Appointments:
+- GET /appointments
+	Role: admin.
+	Get all appointments.
+- GET /appointments/my
+	Roles: admin, doctor, patient.
+	Get appointments for current user.
+- GET /appointments/:id
+	Roles: admin, doctor, patient.
+	Get appointment by id.
+- POST /appointments
+	Roles: admin, doctor, patient.
+	Create appointment.
+- PUT /appointments/:id
+	Roles: admin, doctor, patient.
+	Update appointment.
+- DELETE /appointments/:id
+	Roles: admin, patient.
+	Delete appointment.
+- POST /appointments/:id/payment
+	Roles: admin, doctor.
+	Record manual payment (cash/online legacy).
+- POST /appointments/:id/payment/razorpay/order
+	Roles: admin, doctor.
+	Create Razorpay order for UPI payment.
+- POST /appointments/:id/payment/razorpay/verify
+	Roles: admin, doctor.
+	Verify Razorpay signature and mark payment paid.
+- POST /appointments/:id/reminders/send
+	Roles: admin, doctor.
+	Trigger manual reminder for appointment.
+
+Hospitals:
+- POST /hospitals/register
+	Public hospital registration.
+- GET /hospitals/me/dashboard
+	Role: hospital.
+	Hospital dashboard with doctors, patients, appointments, revenue, payment transactions.
+- GET /hospitals/admin/all?status=&isVerified=
+	Role: admin.
+	List hospitals with filters.
+- GET /hospitals/admin/stats
+	Role: admin.
+	Hospital statistics.
+- GET /hospitals
+	Public list (approved by default unless admin path used).
+- GET /hospitals/public/stats
+	Public platform stats.
+- GET /hospitals/:id
+	Public hospital detail.
+- PUT /hospitals/:id
+	Role: admin.
+	Update hospital.
+- DELETE /hospitals/:id
+	Role: admin.
+	Delete hospital.
+- PATCH /hospitals/:id/approve
+	Role: admin.
+	Approve hospital.
+- PATCH /hospitals/:id/reject
+	Role: admin.
+	Reject hospital.
+
+Ambulances:
+- POST /api/ambulances
+	Roles: admin, hospital.
+	Create ambulance.
+- GET /api/ambulances
+	Roles: admin, hospital.
+	Get all ambulances.
+- GET /api/ambulances/:id
+	Roles: admin, hospital.
+	Get ambulance by id.
+- PUT /api/ambulances/:id
+	Roles: admin, hospital.
+	Update ambulance details.
+- DELETE /api/ambulances/:id
+	Roles: admin, hospital.
+	Delete ambulance.
+- PUT /api/ambulances/:id/location
+	Roles: admin, hospital, driver.
+	Update ambulance location.
+	Body: { lng, lat }
+- PUT /api/ambulances/:id/status
+	Roles: admin, hospital, driver.
+	Update ambulance status.
+	Body: { status }
+- GET /api/ambulances/nearby?lng=&lat=&radius=
+	Roles: admin, hospital, patient.
+	Find nearby available ambulances sorted by distance.
+
+Emergency:
+- POST /api/emergency
+	Roles: patient, admin.
+	Create emergency request.
+	Body: { patientId, lng, lat }
+- POST /api/emergency/:emergencyId/assign
+	Roles: admin, hospital.
+	Assign nearest available ambulance and mark it BUSY.
+- POST /api/emergency/:id/accept
+	Roles: driver, admin.
+	Accept emergency request.
+- POST /api/emergency/:id/complete
+	Roles: driver, admin, hospital.
+	Complete emergency request.
+- POST /api/emergency/:id/cancel
+	Roles: patient, admin, hospital.
+	Cancel emergency request.
+
+Realtime Events (Planned):
+- NEW_EMERGENCY
+- AMBULANCE_ACCEPTED
+- AMBULANCE_LOCATION_UPDATE
+- EMERGENCY_COMPLETED

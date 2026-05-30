@@ -1,0 +1,9 @@
+const [count, setCount] = useState(0);
+
+useEffect(() => {
+  fetch('https://medipulse-1sje.onrender.com/visitor-counter/total')
+    .then(r => r.json())
+    .then(d => setCount(d.count));
+}, []);
+
+return <div>👁️ {count} visits</div>;
